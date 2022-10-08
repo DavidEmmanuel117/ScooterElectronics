@@ -14,6 +14,8 @@
 // Receives input action from serial monitor
 int serial_input_action = 0;
 
+#define SAMPLE_TIME   50
+unsigned long lastMillis = millis();
 
 // Color definitions
 #define  BLACK   0x0000
@@ -104,7 +106,9 @@ void loop(){
 
     // Reads an int from serial port
     // serial_input_action = SerialEvent();
-    SerialEvent();
+    if (millis - lastMillis >= SAMPLE_TIME) { 
+      SerialEvent();
+    }
     
          if (accion == "10KPH"){
             testText();
