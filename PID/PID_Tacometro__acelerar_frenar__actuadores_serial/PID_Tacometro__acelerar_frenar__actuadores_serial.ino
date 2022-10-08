@@ -12,7 +12,7 @@
 #define _ACTION_10KMH   3
 #define _ACTION_15KMH   4
 // Receives input action from serial monitor
-int serial_input_action;
+int serial_input_action = 0;
 
 
 // Color definitions
@@ -96,17 +96,16 @@ void setup() {
    tft.begin();
 //   attachInterrupt(0, rpm_bike, FALLING); //interrupt zero (0) is on pin two(2).
    Wire.begin(); /* join i2c bus as master */
-   Serial.begin(9600);
+   Serial.begin(115200);
 }
 
 
 void loop(){
 
-  // Reads an int from serial port
-  serial_input_action = SerialEvent();
-  // Map serial port input into an state action
-  accion = getAction(serial_input_action);
-
+    // Reads an int from serial port
+    // serial_input_action = SerialEvent();
+    SerialEvent();
+    
          if (accion == "10KPH"){
             testText();
             Wire.requestFrom(8,1);
@@ -293,9 +292,15 @@ unsigned long testText() {
 
 // Reads from serial port, return an int 
 int SerialEvent() {
-  while (!Serial.available());
-  // readString() reads until "\r\n" and the parses to int
-  return Serial.readString().toInt();
+  while (Serial.available()) {
+      // readString() reads until "\r\n" and the parses to int
+    int x = Serial.readString().toInt();  
+    
+    // Map serial port input into an state action
+    accion = getAction(x);
+    return x;
+  }
+  return 0;
 }
 
 // Maps an interger into a state Action 
