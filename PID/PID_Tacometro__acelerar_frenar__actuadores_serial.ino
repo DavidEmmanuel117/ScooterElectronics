@@ -1,11 +1,18 @@
- #include <TFT_ILI9163C.h>
-
+#include <TFT_ILI9163C.h>
 #include <Wire.h>
-
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <TFT_ILI9163C.h>
 #include <Servo.h>
+
+// Serial comm action definitions
+#define _ACTION_LIBRE   0
+#define _ACTION_FRENA   1
+#define _ACTION_5KMH    2
+#define _ACTION_10KMH   3
+#define _ACTION_15KMH   4
+// Receives input action from serial monitor
+int serial_input_action;
 
 
 // Color definitions
@@ -95,17 +102,12 @@ void setup() {
 
 void loop(){
 
-  while(Serial.available()) {
+  // Reads an int from serial port
+  serial_input_action = SerialEvent();
+  // Map serial port input into an state action
+  accion = getAction(serial_input_action);
 
-    accion = Serial.readString();// read the incoming data as string
-
-    Serial.println(accion);
-
-    accion.trim();
-
-}
-
-         if (accion == "10"){
+         if (accion == "10KPH"){
             testText();
             Wire.requestFrom(8,1);
             while(Wire.available()){
@@ -131,7 +133,7 @@ void loop(){
       }
    } 
 
-   if (accion == "15"){
+   if (accion == "15KPH"){
             testText();
             Wire.requestFrom(8,1);
             while(Wire.available()){
@@ -157,7 +159,7 @@ void loop(){
       }
    } 
 
-   if (accion == "5"){
+   if (accion == "5KPH"){
             testText();
             Wire.requestFrom(8,1);
             while(Wire.available()){
@@ -286,4 +288,22 @@ unsigned long testText() {
   tft.setTextSize(3);
   tft.setTextColor(WHITE);
   tft.println("KM/H");
+}
+
+
+// Reads from serial port, return an int 
+int SerialEvent() {
+  while (!Serial.available());
+  // readString() reads until "\r\n" and the parses to int
+  return Serial.readString().toInt();
+}
+
+// Maps an interger into a state Action 
+String getAction(int x) {
+  if (x == _ACTION_LIBRE) return("libre");
+  else if (x == _ACTION_FRENA) return("frena");
+  else if (x == _ACTION_5KMH) return("5KPH");
+  else if (x == _ACTION_10KMH) return("10KPH");
+  else if (x == _ACTION_15KMH) return("15KPH");
+  else return("nada");
 }
