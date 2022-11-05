@@ -105,10 +105,11 @@ void loop()
 {
   linear_vel_km = readSpeed();
 
-  // Reads an int from serial port
-  serial_input_action = SerialEvent();
-  // Map serial port input into an state action
-  accion = getAction(serial_input_action);
+  // serial_input_action = SerialEvent();
+  if (millis - lastMillis >= SAMPLE_TIME)
+  {
+    SerialEvent();
+  }
 
   if (accion == "10KPH")
   {
