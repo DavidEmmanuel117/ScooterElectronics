@@ -5,12 +5,14 @@
 #include <TFT_ILI9163C.h>
 #include <Servo.h>
 
-// Serial comm action definitions
+// Serial comm action definitions dictionary
 #define _ACTION_LIBRE 0
 #define _ACTION_FRENA 1
 #define _ACTION_5KMH 2
 #define _ACTION_10KMH 3
 #define _ACTION_15KMH 4
+#define _ACCION_PRECAUCION 5
+
 // Receives input action from serial monitor
 int serial_input_action;
 
@@ -98,6 +100,7 @@ void setup()
 
 void loop()
 {
+  linear_vel_km = readSpeed();
 
   // Reads an int from serial port
   serial_input_action = SerialEvent();
@@ -107,11 +110,6 @@ void loop()
   if (accion == "10KPH")
   {
     testText();
-    Wire.requestFrom(8, 1);
-    while (Wire.available())
-    {
-      linear_vel_km = Wire.read();
-    }
     set_speed = 80;
     pv_speed = (((linear_vel_km / 3.6) / 0.33) * 30) / M_PI;
     e_speed = set_speed - pv_speed;
@@ -141,11 +139,6 @@ void loop()
   if (accion == "15KPH")
   {
     testText();
-    Wire.requestFrom(8, 1);
-    while (Wire.available())
-    {
-      linear_vel_km = Wire.read();
-    }
     set_speed = 120;
     pv_speed = (((linear_vel_km / 3.6) / 0.33) * 30) / M_PI;
     e_speed = set_speed - pv_speed;
@@ -175,11 +168,6 @@ void loop()
   if (accion == "5KPH")
   {
     testText();
-    Wire.requestFrom(8, 1);
-    while (Wire.available())
-    {
-      linear_vel_km = Wire.read();
-    }
     set_speed = 50;
     pv_speed = (((linear_vel_km / 3.6) / 0.33) * 30) / M_PI;
     e_speed = set_speed - pv_speed;
@@ -227,12 +215,6 @@ void loop()
   if (accion == "nada")
   {
     testText();
-    Wire.requestFrom(8, 1);
-    while (Wire.available())
-    {
-      linear_vel_km = Wire.read();
-    }
-
     ///////////Medir velocidad y mostarla/////////////////////
 
     /*if (millis() - lastmillis >= 1000)
@@ -294,6 +276,20 @@ void loop()
     }
     ////////////////////////////////////
   }
+
+  // Print speed for SAC communication
+  Serial.println(linear_vel_km);
+}
+
+float readSpeed()
+{
+  float speed;
+  Wire.requestFrom(8, 1);
+  while (Wire.available())
+  {
+    speed = Wire.read();
+  }
+  return speed;
 }
 
 unsigned long testText()
@@ -329,6 +325,8 @@ String getAction(int x)
   else if (x == _ACTION_10KMH)
     return ("10KPH");
   else if (x == _ACTION_15KMH)
+    return ("15KPH");
+  else if (x == _ACCION_PRECAUCION)
     return ("15KPH");
   else
     return ("nada");
