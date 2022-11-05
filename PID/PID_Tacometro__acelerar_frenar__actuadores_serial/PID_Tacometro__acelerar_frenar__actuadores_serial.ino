@@ -14,7 +14,10 @@
 #define _ACCION_PRECAUCION 5
 
 // Receives input action from serial monitor
-int serial_input_action;
+int serial_input_action = 0;
+
+#define SAMPLE_TIME 50
+unsigned long lastMillis = millis();
 
 // Color definitions
 #define BLACK 0x0000
@@ -307,10 +310,16 @@ unsigned long testText()
 // Reads from serial port, return an int
 int SerialEvent()
 {
-  while (!Serial.available())
-    ;
-  // readString() reads until "\r\n" and the parses to int
-  return Serial.readString().toInt();
+  while (Serial.available())
+  {
+    // readString() reads until "\r\n" and the parses to int
+    int x = Serial.readString().toInt();
+
+    // Map serial port input into an state action
+    accion = getAction(x);
+    return x;
+  }
+  return 0;
 }
 
 // Maps an interger into a state Action
