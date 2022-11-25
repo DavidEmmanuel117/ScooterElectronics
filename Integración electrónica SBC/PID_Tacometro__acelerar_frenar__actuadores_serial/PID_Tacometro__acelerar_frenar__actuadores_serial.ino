@@ -51,7 +51,6 @@ volatile float rpmcount = 0;
 float rpm = 0;
 float radial_vel = 0;
 float linear_vel = 0;
-unsigned long lastmillis = 0;
 float linear_vel_km = 0;
 ////////////////////////////////////////////////
 
@@ -100,6 +99,17 @@ void setup()
 
 void loop()
 {
+  if (millis() - lastMillis2 >= 2000) 
+  {
+    linear_vel_km = readSpeed();
+
+    // Print speed for SAC communication
+    Serial.println(linear_vel_km);
+    // Print speed in LCD screen
+    testText();
+    lastMillis2 = millis();
+  }
+
   // Reads an int from serial port
   // serial_input_action = SerialEvent();
   if (millis() - lastMillis >= SAMPLE_TIME)
@@ -109,12 +119,6 @@ void loop()
 
   if (accion == "10KPH")
   {
-
-    Wire.requestFrom(8, 1);
-    while (Wire.available())
-    {
-      linear_vel_km = Wire.read();
-    }
     set_speed = 120;
     pv_speed = (((linear_vel_km / 3.6) / 0.33) * 30) / M_PI;
     e_speed = set_speed - pv_speed;
@@ -140,17 +144,11 @@ void loop()
       }
     }
     // linear_vel_km = 10.00;
-    testText();
+    // testText();
   }
 
   else if (accion == "15KPH")
   {
-
-    Wire.requestFrom(8, 1);
-    while (Wire.available())
-    {
-      linear_vel_km = Wire.read();
-    }
     set_speed = 170;
     pv_speed = (((linear_vel_km / 3.6) / 0.33) * 30) / M_PI;
     e_speed = set_speed - pv_speed;
@@ -176,17 +174,12 @@ void loop()
       }
     }
     // linear_vel_km = 15.00;
-    testText();
+    //  testText();
   }
 
   else if (accion == "5KPH")
   {
-    testText();
-    Wire.requestFrom(8, 1);
-    while (Wire.available())
-    {
-      linear_vel_km = Wire.read();
-    }
+    //  testText();
     set_speed = 50;
     pv_speed = (((linear_vel_km / 3.6) / 0.33) * 30) / M_PI;
     e_speed = set_speed - pv_speed;
@@ -233,6 +226,7 @@ void loop()
 
   else /*(accion=="nada")*/
   {
+    /*
     if (millis() - lastMillis2 >= 2000)
     {
       Wire.requestFrom(8, 1);
@@ -241,8 +235,9 @@ void loop()
         linear_vel_km = Wire.read();
       }
       lastMillis2 = millis();
-      testText();
+      //  testText();
     }
+    */
 
     /////////Acelerar y frenar////////////
     if (digitalRead(5) == HIGH)
@@ -278,6 +273,17 @@ void loop()
     }
     ////////////////////////////////////
   }
+}
+
+float readSpeed()
+{
+  float speed;
+  Wire.requestFrom(8, 1);
+  while (Wire.available())
+  {
+    speed = Wire.read();
+  }
+  return speed;
 }
 
 unsigned long testText()
