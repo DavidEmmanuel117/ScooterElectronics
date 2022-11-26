@@ -102,6 +102,7 @@ void loop()
   if (millis() - lastMillis2 >= 2000) 
   {
     linear_vel_km = readSpeed();
+    //linear_vel_km = map(linear_vel_km, 0, 15, 0, 20);
 
     // Print speed for SAC communication
     Serial.println(linear_vel_km);
@@ -119,7 +120,7 @@ void loop()
 
   if (accion == "10KPH")
   {
-    set_speed = 120;
+    set_speed = 80;
     pv_speed = (((linear_vel_km / 3.6) / 0.33) * 30) / M_PI;
     e_speed = set_speed - pv_speed;
     pwm_pulse = e_speed * kp + e_speed_sum * ki;
@@ -149,7 +150,7 @@ void loop()
 
   else if (accion == "15KPH")
   {
-    set_speed = 170;
+    set_speed = 120;
     pv_speed = (((linear_vel_km / 3.6) / 0.33) * 30) / M_PI;
     e_speed = set_speed - pv_speed;
     pwm_pulse = e_speed * kp + e_speed_sum * ki;
@@ -217,7 +218,7 @@ void loop()
   }
   else if (accion == "libre")
   {
-    servoMotor.write(0);
+    servoMotor.write(90);
     digitalWrite(pin_luzd, LOW);
     digitalWrite(pin_bocinas, LOW);
     digitalWrite(pin_luzt, LOW);
@@ -308,9 +309,9 @@ int SerialEvent()
 
     // Map serial port input into an state action
     accion = getAction(x);
+    lastMillis = millis();
     return x;
   }
-  lastMillis = millis();
   return 0;
 }
 
