@@ -28,22 +28,22 @@ unsigned long lastMillis2 = 0;
 #define WHITE 0xFFFF
 
 /*
-Teensy3.x and Arduino's
-You are using 4 wire SPI here, so:
- MOSI:  11//Teensy3.x/Arduino UNO (for MEGA/DUE refere to arduino site)
- MISO:  12//Teensy3.x/Arduino UNO (for MEGA/DUE refere to arduino site)
- SCK:   13//Teensy3.x/Arduino UNO (for MEGA/DUE refere to arduino site)
- the rest of pin below:
- */
+  Teensy3.x and Arduino's
+  You are using 4 wire SPI here, so:
+  MOSI:  11//Teensy3.x/Arduino UNO (for MEGA/DUE refere to arduino site)
+  MISO:  12//Teensy3.x/Arduino UNO (for MEGA/DUE refere to arduino site)
+  SCK:   13//Teensy3.x/Arduino UNO (for MEGA/DUE refere to arduino site)
+  the rest of pin below:
+*/
 #define __CS 10
 #define __DC 9
 #define __RST 12
 TFT_ILI9163C tft = TFT_ILI9163C(__CS, __DC, __RST);
 /*
-Teensy 3.x can use: 2,6,9,10,15,20,21,22,23
-Arduino's 8 bit: any
-DUE: check arduino site
-If you do not use reset, tie it to +3V3
+  Teensy 3.x can use: 2,6,9,10,15,20,21,22,23
+  Arduino's 8 bit: any
+  DUE: check arduino site
+  If you do not use reset, tie it to +3V3
 */
 
 ////////Variables para medir velocidad////////////
@@ -81,6 +81,9 @@ double kp = 0.0094186;
 double ki = 0.05;
 ////////////////////////////////
 
+boolean bocina = false;
+
+
 void setup()
 {
   pinMode(pwm_pin, OUTPUT);
@@ -99,7 +102,8 @@ void setup()
 
 void loop()
 {
-  if (millis() - lastMillis2 >= 2000) 
+
+  if (millis() - lastMillis2 >= 2000)
   {
     linear_vel_km = readSpeed();
     //linear_vel_km = map(linear_vel_km, 0, 15, 0, 20);
@@ -118,8 +122,20 @@ void loop()
     SerialEvent();
   }
 
+  if (bocina) {
+    digitalWrite(pin_bocinas, HIGH);
+    delay(100);
+    digitalWrite(pin_bocinas, LOW);
+    delay(100);
+    digitalWrite(pin_bocinas, HIGH);
+    delay(100);
+    digitalWrite(pin_bocinas, LOW);
+    bocina = false;
+  }
+
   if (accion == "10KPH")
   {
+
     set_speed = 80;
     pv_speed = (((linear_vel_km / 3.6) / 0.33) * 30) / M_PI;
     e_speed = set_speed - pv_speed;
@@ -180,6 +196,7 @@ void loop()
 
   else if (accion == "5KPH")
   {
+
     //  testText();
     set_speed = 50;
     pv_speed = (((linear_vel_km / 3.6) / 0.33) * 30) / M_PI;
@@ -228,8 +245,8 @@ void loop()
   else /*(accion=="nada")*/
   {
     /*
-    if (millis() - lastMillis2 >= 2000)
-    {
+      if (millis() - lastMillis2 >= 2000)
+      {
       Wire.requestFrom(8, 1);
       while (Wire.available())
       {
@@ -237,7 +254,7 @@ void loop()
       }
       lastMillis2 = millis();
       //  testText();
-    }
+      }
     */
 
     /////////Acelerar y frenar////////////
@@ -322,12 +339,18 @@ String getAction(int x)
     return ("libre");
   else if (x == _ACTION_FRENA)
     return ("frena");
-  else if (x == _ACTION_5KMH)
+  else if (x == _ACTION_5KMH) {
+    bocina = true;
     return ("5KPH");
-  else if (x == _ACTION_10KMH)
+  }
+  else if (x == _ACTION_10KMH) {
+    bocina = true;
     return ("10KPH");
-  else if (x == _ACTION_15KMH)
+  }
+  else if (x == _ACTION_15KMH) {
+    bocina = true;
     return ("15KPH");
+  }
   else
     return ("nada");
 }
